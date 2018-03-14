@@ -19,17 +19,14 @@
 #include <Servo.h>
 
 // In degrees, with it's resting position being 0 degrees.
-// TODO: Verify these values, as these are rough approximations.
-// These are correct according to the spec sheet, but it needs actual testing.
-// These values should be within the operating range, as anything over
-// these gets set to this angle.
-const short MAX_ROTATION_RIGHT = 60;
-const short MAX_ROTATION_LEFT = 60;
+// It'a maximum range is 180 degrees.
+const short MAX_ROTATION_RIGHT = 0;
+const short MAX_ROTATION_LEFT = 180;
 
 // 5 Servos atm, one for each finger.
 const short SERVO_COUNT = 5;
 
-const int MS_DELAY = 5*100 // How long to wait between iterations in milliseconds.
+const int MS_DELAY = 5*100; // How long to wait between iterations in milliseconds.
 
 // List of all servos and pin ids.
 // Only the digital input needs to be attached, which is just one pin.
@@ -46,60 +43,61 @@ struct servo_struct
   Servo servo_obj;
   int meter_val;  // Analog pin used to connect the potentiometer.
                   // TODO: Need to map these as well.
-}
-std::vector<struct> servo_list;
+};
+std::vector<servo_struct> servo_list;
 
 int val;  // variable to read the value from the analog pin
 
-bool revsere = false;
+bool revsere_direction = false;
 
 void setup()
 {
+  Serial
   // Create a new servo object and populat the list.
   // Assuming sequential pin ids, and none are skipped.
   // If any non-sequential method is used, hardcoding the attchments will
   // be required. Starting at 2, as that's the first PWM pin.
   for (short pin_id=2; pin_id < (SERVO_COUNT+pin_id); pin_id++)
   {
+    Serial.begin(9600); // Set up the serial port with it's baud rate.
     Servo servo;
     servo.attach(pin_id);  // Attach/Assign the servo to a pin.
-    tmp_struct = new servo_struct;
+    servo_struct tmp_struct;
     tmp_struct.servo_obj = servo;
-    //tmp_struct.meter_val = ????? // TODO: Figure out what the mappings should be for these pins.
-    
-    servo_list.push_back(&tmp_struct); // Add it to the list.
+    servo_list.push_back(tmp_struct); // Add it to the list.
   }
 }
 
 void loop()
 {
-  for (short iter = 0; iter < SERVO_COUNT; iter++;)
-  {
-    tmp_struct = servo_list[iter]
-    int val = analogRead(tmp_struct.meter_val);  // Reads the value of the potentiometer (value between 0 and 1023)
+  // Wait until it's avaialable.
+  if (Serial.available() > 0)
+  { // read the incoming byte:
+    int incomingByte = Serial.parseInt();
 
-    // Scale it to use it with the servo (value between 0 and 180)
-    // Syntax: value, fromLow, fromHigh, toLow, toHigh
-    // So this function maps value that's within a range to a new range.
-    // Flipping the high and low effectively gives the "reverse" direction.
-    if reverse
-      val = map(val, 0, 1023, 180, 0);
-    else
-      val = map(val, 0, 1023, 0, 180);
+    // say what you got:
+    Serial.print("I received: ");
+    Serial.println(incomingByte, DEC);
+  }
+  for (short iter = 0; iter < SERVO_COUNT; iter++)
+  {
+    servo_struct tmp_struct = servo_list[iter];
 
     // Make sure we don't overextend.
-    if val > MAX_ROTATION_RIGHT
+    if (val > MAX_ROTATION_RIGHT)
       val = MAX_ROTATION_RIGHT;
-    else if val > MAX_ROTATION_LEFT
+    else if (val > MAX_ROTATION_LEFT)
       val = MAX_ROTATION_LEFT;
     
     tmp_struct.servo_obj.write(val);  // Sets the servo position according to the scaled value (as an angle)
+
+    delay(100);
   }
   // Flip the direction for the next iteration.
-  if reverse
-    reverse = false;
+  if (revsere_direction == true)
+    revsere_direction = false;
   else
-    reverse = true;
+    revsere_direction = true;
   
   delay(MS_DELAY);  // Waits for the servo to get there, and delays until the next iteration.
 }
