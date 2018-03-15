@@ -1,3 +1,5 @@
+#include <util.h>
+
 /* module for robot hand cli functionality 
  */
 typedef unsigned char COMMAND_STATUS;
@@ -9,6 +11,7 @@ typedef COMMAND_STATUS (*cli_function_pointer)(unsigned char, char *);
 //a list at some point if the number of functions grows
 #define NUM_FUNCTIONS 0
 
+//TODO: need way to specify expected types of params, maybe enum?
 struct {
   char * func_name;
   char num_arguments;
@@ -45,6 +48,37 @@ Function * find_function(char * name)
     if(cli_strcmp(name, Functions[i].func_name))
       return Functions + i;
   return 0;
+}
+
+/* Function to call the supplied function.
+ * Needs to parse the line that the user sent in into the function and args
+ *
+ * Command is expected to be a line that was entered in serial.
+ * 	Ex: rotate 0 180
+ * The function will call the function 'rotate' with the params 0 and 180
+ *
+ * TODO: Fix the fundamental problem with this function, it expects that the user
+ * is not an idiot.  If more than one space seperates words it won't work
+ */
+COMMAND_STATUS call_function(char * command)
+{
+  if(!command)//error if null pointer
+    return 1;
+  u_i8 split_size = 0; 
+  split_size = get_split_size(command);
+
+  //I know you can't do this in c, maybe you can in c++. Otherwise dynamic
+  char * argv [split_size - 1];
+  char * func_name;
+
+  identify_and_parse(command, func_name, argv, slpit_size - 1);
+  //at this point we should have all of the correct things in the correct slots
+  
+  Function * function = finc_function(func_name);
+  if(function == 0)
+    return 1;
+
+  //we have the function.  Call it and everything
 }
 
 int main()
