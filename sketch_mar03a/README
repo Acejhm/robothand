@@ -1,0 +1,27 @@
+So basic cli functionality seems to be good to go.  I haven't tried it with an
+ardunio yet, but it does compile - and as a bonus it works!
+
+Right now there are only two functions implemneted, both of which are tests.
+
+type 'make' to make the program.  A binary file name 'out' willbe created.
+Invoke it and it will ask for a command, enter 'test' and it will run the test
+function.  Then try 'arg_test' with any number or arguments and it will show
+off its ability to parse args.
+
+
+I don't believe I'm using any stdlib things in the actuall code that matters
+(other than maybe stdio?).
+
+
+FILE STRUCTURE:
+    Function definitions should go in the function.c file and be defined in 
+    the header.
+
+    CLI modifications and improvments should go in the cli.c file
+
+    Anything that doesn't really fit into a defined category should go into the
+    util file and header.  This header file also defines some of the typedef'd
+    types that we use.  I tried to use unsigned chars (that I typedefed) in most
+    places because of memory constraints.  
+
+
